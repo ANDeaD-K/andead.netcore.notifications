@@ -17,6 +17,7 @@ namespace andead.netcore.notifications
         {
             services.AddMvc();
             services.AddSingleton(new NotificationTokens());
+            services.AddHttpClient();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -33,5 +33,10 @@ namespace andead.netcore.notifications.Models
                 });
             }
         }
+
+        public IEnumerable<NotificationToken> GetMyTokens(int userId)
+        {
+            return tokens.Where(t => t.UserId == userId);
+        }
     }
 }
