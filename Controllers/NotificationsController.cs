@@ -4,6 +4,7 @@ using andead.netcore.notifications.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace andead.netcore.notifications.Controllers
 {
@@ -19,10 +20,11 @@ namespace andead.netcore.notifications.Controllers
             _tokens = tokens;
         }
 
-        [HttpPost("add"), HttpGet("add")]
-        public IActionResult AddToken(int userId, string userToken)
+        [HttpPost("add")]
+        public IActionResult AddToken(int userId, [FromBody] DeviceToken request)
         {
-            _tokens.AddToken(userId, userToken);
+            _logger.LogWarning(JsonConvert.SerializeObject(request));
+            //_tokens.AddToken(userId, userToken);
 
             return Ok($"This is Add method: {userId}");
         }

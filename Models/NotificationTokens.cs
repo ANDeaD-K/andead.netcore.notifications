@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace andead.netcore.notifications.Models
 {
+    public class DeviceToken
+    {
+        public string token { get; set; }
+    }
+
     public class NotificationToken
     {
         public int UserId { get; set; }
