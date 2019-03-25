@@ -24,18 +24,34 @@ namespace andead.netcore.notifications.Controllers
         public IActionResult AddToken(int userId, [FromBody] DeviceToken request)
         {
             _logger.LogWarning(JsonConvert.SerializeObject(request));
-            //_tokens.AddToken(userId, userToken);
+            
+            if (userId != 0 && !String.IsNullOrEmpty(request.token))
+            {
+                _tokens.AddToken(userId, request.token);
+                _logger.LogWarning(GetTokens());
 
-            return Ok($"This is Add method: {userId}");
+                return Ok(JsonConvert.SerializeObject(
+                    new
+                    {
+                        success = userId,
+                        token = request.token
+                    })
+                );
+            }
+
+            return BadRequest(JsonConvert.SerializeObject(
+                new
+                {
+                    error = "invalid_request",
+                    error_description = "Token is invalid."
+                })
+            );
         }
 
-        [HttpGet("tokens")]
-        public IActionResult GetTokens()
+        private string GetTokens()
         {
-            var tokens = _tokens.GetTokens().Select(t => $"{t.UserId} = {t.Token}").ToArray();
-            _logger.LogWarning($"Tokens: {String.Join(", ", tokens)}");
-
-            return Ok($"GetTokens");
+            var tokens = _tokens.GetTokens().Select(t => $"UserId: {t.UserId} = {t.Token}").ToArray();
+            return $"Tokens: {String.Join(", ", tokens)}";
         }
     }
 }
