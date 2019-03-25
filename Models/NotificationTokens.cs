@@ -24,19 +24,14 @@ namespace andead.netcore.notifications.Models
 
         public void AddToken(int userId, string userToken)
         {
-            NotificationToken token = tokens.FirstOrDefault(t => t.UserId == userId);
-
-            if (token != null)
+            if (tokens.FirstOrDefault(t => t.Token == userToken) == null)
             {
-                token.Token = userToken;
-                return;
+                tokens.Add(new NotificationToken()
+                {
+                    UserId = userId,
+                    Token = userToken
+                });
             }
-
-            tokens.Add(new NotificationToken()
-            {
-                UserId = userId,
-                Token = userToken
-            });
         }
     }
 }
