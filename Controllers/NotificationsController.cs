@@ -94,6 +94,7 @@ namespace andead.netcore.notifications.Controllers
             
             string serverKey = _config.GetValue<string>("server-key", String.Empty);
 
+            httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"key={serverKey}");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
 
@@ -109,7 +110,7 @@ namespace andead.netcore.notifications.Controllers
                 to = request.token
             };
 
-            var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", fcmRrequest).Result;
+            var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", JsonConvert.SerializeObject(fcmRrequest)).Result;
              _logger.LogWarning(response.Content.ReadAsStringAsync().Result);
 
             return Ok(new
