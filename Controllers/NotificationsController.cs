@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using andead.netcore.notifications.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -98,7 +99,7 @@ namespace andead.netcore.notifications.Controllers
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"key={serverKey}");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
 
-            var fcmRrequest = new
+            var fcmRrequest = JsonConvert.SerializeObject(new
             {
                 notification = new
                 {
@@ -108,10 +109,16 @@ namespace andead.netcore.notifications.Controllers
                     icon = "https://linux-docker.westeurope.cloudapp.azure.com/images/icons/fraise-icon-72.png"
                 },
                 to = request.token
-            };
+            });
 
-            var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", JsonConvert.SerializeObject(fcmRrequest)).Result;
-             _logger.LogWarning(response.Content.ReadAsStringAsync().Result);
+            _logger.LogWarning(fcmRrequest);
+
+            // var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", JsonConvert.SerializeObject(fcmRrequest)).Result;
+
+            var response = httpClient.PostAsync("https://fcm.googleapis.com/fcm/send", 
+                new StringContent(fcmRrequest, Encoding.UTF8, "application/json")).Result;
+
+            _logger.LogWarning(response.Content.ReadAsStringAsync().Result);
 
             return Ok(new
                 {
