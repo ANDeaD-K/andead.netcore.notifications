@@ -109,7 +109,9 @@ namespace andead.netcore.notifications.Controllers
                 to = request.token
             };
 
-            httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", fcmRrequest);
+            var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", fcmRrequest).Result;
+             _logger.LogWarning(JsonConvert.SerializeObject(response.Content));
+
             return Ok(new
                 {
                     success = request.token
