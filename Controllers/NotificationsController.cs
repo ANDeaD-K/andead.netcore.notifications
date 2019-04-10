@@ -112,6 +112,7 @@ namespace andead.netcore.notifications.Controllers
             {
                 _context.Add(new WebNotification()
                 {
+                    date_time = DateTime.Now,
                     user_id = userId.ToString(),
                     title = notification.title,
                     body = notification.body
