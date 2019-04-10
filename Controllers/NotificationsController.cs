@@ -103,7 +103,7 @@ namespace andead.netcore.notifications.Controllers
         }
 
         [HttpPost("send-group")]
-        public IActionResult SendGroupNotification(int userId, Notification notification)
+        public IActionResult SendGroupNotification(int userId, [FromBody] Notification notification)
         {
             _notificationManager.SendNotification($"/topics/{userId}", notification.title, notification.body);
 
