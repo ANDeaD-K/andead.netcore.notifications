@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ev
 
-echo "dotnet andead.netcore.notifications.dll --server-key=$SERVER_KEY" >> ./publish/entrypoint.sh
+echo "dotnet andead.netcore.notifications.dll --server-key=$SERVER_KEY --pg-connection-string=$PG_CONNECTION_STRING" >> ./publish/entrypoint.sh
 
 docker build -t andead/netcore.notifications:latest publish/.
 

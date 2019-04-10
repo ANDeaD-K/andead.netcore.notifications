@@ -19,15 +19,18 @@ namespace andead.netcore.notifications.Controllers
         private readonly ILogger _logger;
         private NotificationTokens _tokens;
         private NotificationManager _notificationManager;
+        private readonly NotificationContext _context;
 
         public NotificationsController(
             ILogger<NotificationsController> logger,
             NotificationTokens tokens,
-            NotificationManager notificationManager)
+            NotificationManager notificationManager,
+            NotificationContext context)
         {
             _logger = logger;
             _tokens = tokens;
             _notificationManager = notificationManager;
+            _context = context;
         }
 
         [HttpPost("add")]
@@ -105,6 +108,27 @@ namespace andead.netcore.notifications.Controllers
         [HttpPost("send-group")]
         public IActionResult SendGroupNotification(int userId, [FromBody] Notification notification)
         {
+            try
+            {
+                _context.Add(new WebNotification()
+                {
+                    user_id = userId.ToString(),
+                    title = notification.title,
+                    body = notification.body
+                });
+                _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(JsonConvert.SerializeObject(
+                    new
+                    {
+                        error = "Database error",
+                        message = e.StackTrace
+                    }
+                ));
+            }
+
             _notificationManager.SendNotification($"/topics/{userId}", notification.title, notification.body);
 
             return Ok(new
