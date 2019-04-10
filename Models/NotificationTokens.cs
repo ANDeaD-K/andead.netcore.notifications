@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,7 +21,7 @@ namespace andead.netcore.notifications.Models
 
         public List<NotificationToken> GetTokens() => tokens;
 
-        public void AddToken(int userId, string userToken)
+        public bool AddToken(int userId, string userToken)
         {
             if (tokens.FirstOrDefault(t => t.Token == userToken) == null)
             {
@@ -31,7 +30,11 @@ namespace andead.netcore.notifications.Models
                     UserId = userId,
                     Token = userToken
                 });
+
+                return true;
             }
+
+            return false;
         }
 
         public IEnumerable<NotificationToken> GetMyTokens(int userId)

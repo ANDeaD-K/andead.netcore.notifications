@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using andead.netcore.notifications.Managers;
 using andead.netcore.notifications.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -17,6 +18,7 @@ namespace andead.netcore.notifications
         {
             services.AddMvc();
             services.AddSingleton(new NotificationTokens());
+            services.AddSingleton<NotificationManager>();
             services.AddHttpClient();
         }
 

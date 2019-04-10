@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using andead.netcore.notifications.Managers;
 using andead.netcore.notifications.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,16 @@ namespace andead.netcore.notifications.Controllers
     {
         private readonly ILogger _logger;
         private NotificationTokens _tokens;
-        private IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _config;
+        private NotificationManager _notificationManager;
 
         public NotificationsController(
             ILogger<NotificationsController> logger,
             NotificationTokens tokens,
-            IHttpClientFactory httpClientFactory,
-            IConfiguration configuration)
+            NotificationManager notificationManager)
         {
             _logger = logger;
             _tokens = tokens;
-            _httpClientFactory = httpClientFactory;
-            _config = configuration;
+            _notificationManager = notificationManager;
         }
 
         [HttpPost("add")]
@@ -39,7 +37,11 @@ namespace andead.netcore.notifications.Controllers
             
             if (userId != 0 && !String.IsNullOrEmpty(request.token))
             {
-                _tokens.AddToken(userId, request.token);
+                if (_tokens.AddToken(userId, request.token))
+                {
+                    _notificationManager.SubscribeTopic(request.token, userId.ToString());
+                }
+
                 _logger.LogWarning(GetTokens());
 
                 return Ok(JsonConvert.SerializeObject(
@@ -89,40 +91,25 @@ namespace andead.netcore.notifications.Controllers
         }
 
         [HttpPost("send")]
-        public IActionResult SendNotification([FromBody] DeviceToken request)
+        public IActionResult SendNotification(int userId, [FromBody] Notification notification)
         {
-            HttpClient httpClient = _httpClientFactory.CreateClient();
-            
-            string serverKey = _config.GetValue<string>("server-key", String.Empty);
-
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"key={serverKey}");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-
-            var fcmRrequest = JsonConvert.SerializeObject(new
-            {
-                notification = new
-                {
-                    title = "Push уведомление",
-                    body = "Тестовое сообщение",
-                    click_action = "https://linux-docker.westeurope.cloudapp.azure.com/",
-                    icon = "https://linux-docker.westeurope.cloudapp.azure.com/images/icons/fraise-icon-72.png"
-                },
-                to = request.token
-            });
-
-            _logger.LogWarning(fcmRrequest);
-
-            // var response = httpClient.PostAsJsonAsync("https://fcm.googleapis.com/fcm/send", JsonConvert.SerializeObject(fcmRrequest)).Result;
-
-            var response = httpClient.PostAsync("https://fcm.googleapis.com/fcm/send", 
-                new StringContent(fcmRrequest, Encoding.UTF8, "application/json")).Result;
-
-            _logger.LogWarning(response.Content.ReadAsStringAsync().Result);
+            _notificationManager.SendNotification(notification.token, notification.title, notification.body);
 
             return Ok(new
                 {
-                    success = request.token
+                    success = DateTime.Now
+                }
+            );
+        }
+
+        [HttpPost("group-send")]
+        public IActionResult SendGroupNotification(int userId, Notification notification)
+        {
+            _notificationManager.SendNotification(userId.ToString(), notification.title, notification.body);
+
+            return Ok(new
+                {
+                    success = DateTime.Now
                 }
             );
         }
